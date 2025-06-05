@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵梦岛文件封印X</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                        info: '#06b6d4',
+                        dark: '#1e293b',
+                        light: '#f8fafc',
+                        accent: '#00d1b2' // 新增强调色
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+                        'card-hover': '0 20px 40px -5px rgba(0, 0, 0, 0.15)',
+                        'soft': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 3s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+
+            .shadow-soft {
+                box-shadow: theme('boxShadow.soft');
+            }
+
+            .transition-smooth {
+                transition: all 0.3s ease;
+            }
+
+            .bg-gradient-primary {
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            }
+
+            .text-gradient {
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+                background-image: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            }
+
+            .file-drop-area {
+                position: relative;
+                transition: all 0.2s ease;
+            }
+
+            .file-drop-area.active {
+                background-color: rgba(59, 130, 246, 0.1);
+                border-color: #3b82f6;
+            }
+
+            .progress-ring-circle {
+                transition: stroke-dashoffset 0.35s;
+                transform: rotate(-90deg);
+                transform-origin: 50% 50%;
+            }
+
+            .feature-badge {
+                background-color: rgba(0, 209, 178, 0.1);
+                color: #00d1b2;
+                border-radius: 9999px;
+                padding: 0.25rem 0.75rem;
+                font-size: 0.875rem;
+                font-weight: 600;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-inter text-gray-800">
+    <div class="container mx-auto px-4 py-8 md:py-16 max-w-6xl">
+        <!-- 页面标题 -->
+        <div class="text-center mb-12 animate-fade-in">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                <i class="fa fa-shield text-primary text-2xl"></i>
+            </div>
+            <h1 class="text-[clamp(1.8rem,5vw,2.8rem)] font-bold text-gray-900 mb-4">
+                <span class="text-gradient">灵梦岛文件封印X（开源版）</span>
+            </h1>
+            <p class="text-gray-600 max-w-2xl mx-auto text-lg">
+                非常危险地加密/解密您的文件，您的隐私和数据安全非常不重要
+            </p>
+            <div class="flex justify-center space-x-2 mt-4">
+                <span class="feature-badge">开源</span>
+                <span class="feature-badge">本地处理</span>
+                <span class="feature-badge">无限制文件大小</span>
+                <span class="feature-badge">SHA-256加密</span>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- 左侧控制面板 -->
+            <div class="lg:col-span-7 animate-slide-up" style="animation-delay: 0.1s">
+                <!-- 文件上传表单 -->
+                <div class="bg-white rounded-3xl shadow-card p-6 md:p-8 transition-smooth hover:shadow-card-hover">
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                            <i class="fa fa-cog text-primary"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900">文件操作</h2>
+                    </div>
+
+                    <form id="fileForm" class="space-y-6">
+                        <!-- 操作类型选择 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-smooth">
+                                <input type="radio" id="encrypt" name="action" value="encrypt" class="h-5 w-5 text-primary focus:ring-primary border-gray-300" checked>
+                                <div class="ml-3">
+                                    <div class="text-base font-medium text-gray-900">加密文件</div>
+                                    <div class="text-sm text-gray-500">保护您的敏感数据</div>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-smooth">
+                                <input type="radio" id="decrypt" name="action" value="decrypt" class="h-5 w-5 text-primary focus:ring-primary border-gray-300">
+                                <div class="ml-3">
+                                    <div class="text-base font-medium text-gray-900">解密文件</div>
+                                    <div class="text-sm text-gray-500">恢复已加密的文件</div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- 密码输入 -->
+                        <div class="space-y-2">
+                            <label for="password" class="block text-sm font-medium text-gray-700">密码</label>
+                            <div class="relative">
+                                <input type="password" id="password" name="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-smooth pl-10" placeholder="输入用于加密/解密的密码">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-lock text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 文件上传区域 -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">选择文件</label>
+                            <div id="drop-area" class="file-drop-area mt-1 flex justify-center px-6 pt-8 pb-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-smooth">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <i class="fa fa-cloud-upload text-primary text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-medium text-gray-700 mb-1">拖放文件到此处</h3>
+                                    <p class="text-sm text-gray-500 mb-4">或</p>
+                                    <label for="file-upload" class="inline-flex items-center px-5 py-2.5 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth cursor-pointer">
+                                        <i class="fa fa-folder-open mr-2"></i>
+                                        选择文件
+                                        <input id="file-upload" name="files[]" type="file" class="sr-only" multiple>
+                                    </label>
+                                    <p class="text-xs text-gray-500 mt-4" id="file-info">
+                                        支持多种格式，上传文件大小限制：无限大小
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 错误提示区域 -->
+                        <div id="error-message" class="hidden p-4 bg-danger/10 border-l-4 border-danger text-danger rounded-lg">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <i class="fa fa-exclamation-circle"></i>
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <p id="error-text" class="text-sm font-medium"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 进度条 -->
+                        <div id="progress-container" class="hidden">
+                            <div class="flex items-center justify-between mb-2">
+                                <span id="progress-text" class="text-sm font-medium text-gray-700">处理中...</span>
+                                <span id="progress-percentage" class="text-sm font-medium text-primary">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="progress-bar" class="bg-primary h-2.5 rounded-full transition-smooth" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- 提交按钮 -->
+                        <div class="pt-2">
+                            <button type="submit" id="submitBtn" class="w-full inline-flex items-center justify-center px-6 py-3.5 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-gradient-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth">
+                                <i class="fa fa-lock mr-2"></i>
+                                <span id="btn-text">开始加密</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 右侧信息面板 -->
+            <div class="lg:col-span-5 animate-slide-up" style="animation-delay: 0.2s">
+                <!-- 处理结果区域 -->
+                <div id="result-container" class="bg-white rounded-3xl shadow-card p-6 md:p-8 transition-smooth hover:shadow-card-hover">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center mr-3">
+                                <i class="fa fa-check text-success"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900">处理结果</h2>
+                        </div>
+                        <button id="clearResults" class="text-sm text-gray-500 hover:text-gray-700 transition-smooth">
+                            <i class="fa fa-trash-o mr-1"></i> 清空
+                        </button>
+                    </div>
+
+                    <div id="empty-state" class="py-10 text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="fa fa-file-o text-gray-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">暂无处理的文件</h3>
+                        <p class="text-sm text-gray-500 max-w-xs mx-auto">
+                            上传文件并完成加密/解密后，结果将显示在这里
+                        </p>
+                    </div>
+
+                    <div id="result-list" class="space-y-4 hidden">
+                        <!-- 结果将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+
+                <!-- 安全提示 -->
+                <div class="mt-6 bg-gray-50 rounded-3xl p-6 shadow-soft">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
+                                <i class="fa fa-info-circle text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-base font-medium text-gray-900">安全提示</h3>
+                            <div class="mt-2 text-sm text-gray-600 space-y-2">
+                                <p>• 请记住您的密码，否则无法解密文件</p>
+                                <p>• 所有操作都在本地完成，不会上传到服务器</p>
+                                <p>• 建议使用复杂密码提高安全性</p>
+                                 <p class="text-danger" href="https://wy.fghdz.top/" >• 开源的我信不过，我要闭源的</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增：优势模块 -->
+        <section class="mt-16">
+            <h2 class="text-2xl font-bold text-gray-900 text-center mb-8">为什么选择我们的加密工具？</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">完全开源</h3>
+                    <p class="text-gray-600 text-sm">都开源了，加解密算法懂点的用户右键查看源代码都看得见，破解还不是随随便便的事情</p>
+                </div>
+                <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">文件无损加解密</h3>
+                    <p class="text-gray-600 text-sm">我只负责加密，用户能不能解密成功光我什么事，不搞坏用户的文件已经是本站最大的慈悲了</p>
+                </div>
+                <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">种子级别加密</h3>
+                    <p class="text-gray-600 text-sm">像MC生成世界一样，来加密？得了吧，假的，这个只是UI，免费开源的，又没人给我钱，你还想要根据种子特征来加密？</p>
+                </div>
+                <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">多次迭代加密</h3>
+                    <p class="text-gray-600 text-sm">迭代是什么意思我也不知道，用户肯定也不知道，骗就行了，我应该把文案写成宇宙级加密的，艺术加工懂吗</p>
+                </div>
+                
+                <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">无限制加解密文件大小</h3>
+                    <p class="text-gray-600 text-sm">文件越大，本站偷的越欢，可惜啊，本站服务器没那么大的硬盘和带宽，不然把用户的文件都偷了拿去卖钱</p>
+                </div>
+                
+                
+                <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">本地处理</h3>
+                    <p class="text-gray-600 text-sm">嗯，可是这个代码在我的服务器上，上传了用户也不知道，我反手就买了用户的文件，我还把用户密码给偷了拿去撞库</p>
+                </div>
+                
+                <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">SHA-256加密</h3>
+                    <p class="text-gray-600 text-sm">SHA-256是啥东西，我随便找一个名词来骗用户就行了，用户看见自己不懂的就觉得这东西非常高级</p>
+                </div>
+                
+                <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">专业加密格式.lmdx</h3>
+                    <p class="text-gray-600 text-sm">用户不知道，其实这就代表着加密算法太垃圾，本程序甚至都没有碰到用户的文件，随便加一个后缀代表加密就行了，某些用户甚至连后缀是什么都不知道</p>
+                </div>
+                
+                <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">高速加解密</h3>
+                    <p class="text-gray-600 text-sm">就如左边说的，改个后缀要什么算力，当然本站会故意创建延时，来增加一点点的加密时间，让用户感觉到真的在加密</p>
+                </div>
+                
+                
+                
+            </div>
+        </section>
+
+        <!-- 新增：教程模块 -->
+        <section class="mt-16">
+            <h2 class="text-2xl font-bold text-gray-900 text-center mb-8">使用教程</h2>
+            <div class="space-y-6">
+                <div class="flex items-start">
+                    <div class="w-10 h-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">1</div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">选择操作类型</h3>
+                        <p class="text-gray-600 text-sm">根据您的需求，选择"加密文件"或"解密文件"选项。</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-10 h-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">2</div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">设置密码</h3>
+                        <p class="text-gray-600 text-sm">输入用于加密或解密的密码，根据你的密码来生成加密规则</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-10 h-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">3</div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">上传文件</h3>
+                        <p class="text-gray-600 text-sm">通过拖放或点击"选择文件"按钮上传您想要处理的文件。</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-10 h-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">4</div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">执行操作</h3>
+                        <p class="text-gray-600 text-sm">点击"开始加密"或"开始解密"按钮执行相应操作。</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-10 h-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">5</div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">下载结果</h3>
+                        <p class="text-gray-600 text-sm">操作完成后，点击下载按钮获取处理后的文件。</p>
+                    </div>
+                    
+                </div>
+                
+                
+                 <div class="flex items-start">
+                    <div class="w-10 h-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">5</div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">解密文件</h3>
+                        <p class="text-gray-600 text-sm">上传加密后的文件后点击解密</p>
+                    </div>
+                </div>
+                
+                   <div class="flex items-start">
+                    <div class="w-10 h-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">5</div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">下载解密文件</h3>
+                        <p class="text-gray-600 text-sm">操作完成后，点击下载按钮获取处理后的文件</p>
+                    </div>
+                </div>
+                
+                
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="mt-16 text-center text-sm text-gray-500 pb-8">
+            <p>© 2025 文件加密系统 | 在偷你的重要数据</p>
+            <p>免责声明：本站的文案仅供娱乐，本站未偷任何用户文件，加解密也是相对安全的</p>
+        </footer>
+    </div>
+
+    <script>
+        // 加密文件扩展名
+        const ENCRYPTED_EXTENSION = '.lmdx';
+
+        // 监听文件选择变化
+        document.getElementById('file-upload').addEventListener('change', function (e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                updateFileInfo(files);
+            }
+        });
+
+        // 拖放功能
+        const dropArea = document.getElementById('drop-area');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('active');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('active');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                document.getElementById('file-upload').files = files;
+                updateFileInfo(files);
+            }
+        }
+
+        // 更新文件信息显示
+        function updateFileInfo(files) {
+            const fileInfo = document.getElementById('file-info');
+            if (files.length === 1) {
+                fileInfo.textContent = `已选择: ${files[0].name}`;
+            } else {
+                fileInfo.textContent = `已选择 ${files.length} 个文件`;
+            }
+        }
+
+        // 监听操作类型变化
+        document.getElementById('encrypt').addEventListener('change', updateButtonText);
+        document.getElementById('decrypt').addEventListener('change', updateButtonText);
+
+        // 更新按钮文本
+        function updateButtonText() {
+            const btnText = document.getElementById('btn-text');
+            if (document.getElementById('encrypt').checked) {
+                btnText.textContent = '开始加密';
+            } else {
+                btnText.textContent = '开始解密';
+            }
+        }
+
+        // 表单提交处理
+        document.getElementById('fileForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            hideErrorMessage();
+
+            // 获取表单数据
+            const files = document.getElementById('file-upload').files;
+            const password = document.getElementById('password').value;
+            const action = document.querySelector('input[name="action"]:checked').value;
+
+            // 验证文件
+            if (files.length === 0) {
+                showErrorMessage('请选择要处理的文件');
+                return;
+            }
+
+            // 验证密码
+            if (!password) {
+                showErrorMessage('请输入密码');
+                return;
+            }
+
+            // 显示进度条
+            showProgressBar();
+
+            // 处理每个文件
+            const results = [];
+            for (let i = 0; i < files.length; i++) {
+                try {
+                    // 更新进度
+                    updateProgress((i / files.length) * 100, `处理文件 ${i + 1}/${files.length}`);
+
+                    const file = files[i];
+                    let result;
+
+                    if (action === 'encrypt') {
+                        result = await encryptFile(file, password);
+                    } else {
+                        result = await decryptFile(file, password);
+                    }
+
+                    results.push(result);
+                } catch (error) {
+                    console.error('处理文件时出错:', error);
+                    showErrorMessage(`处理文件 ${files[i].name} 时出错: ${error.message}`);
+                    return;
+                }
+            }
+
+            // 完成进度
+            updateProgress(100, '处理完成');
+
+            // 显示结果
+            displayResults(results);
+        });
+
+        // 显示进度条
+        function showProgressBar() {
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const progressPercentage = document.getElementById('progress-percentage');
+
+            progressBar.style.width = '0%';
+            progressText.textContent = '准备中...';
+            progressPercentage.textContent = '0%';
+            progressContainer.classList.remove('hidden');
+        }
+
+        // 更新进度
+        function updateProgress(percentage, text) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const progressPercentage = document.getElementById('progress-percentage');
+
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = text;
+            progressPercentage.textContent = `${Math.round(percentage)}%`;
+        }
+
+        // 显示错误消息
+        function showErrorMessage(message) {
+            const errorMessage = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+
+            // 添加动画效果
+            errorMessage.classList.add('animate-pulse');
+            setTimeout(() => {
+                errorMessage.classList.remove('animate-pulse');
+            }, 1000);
+        }
+
+        // 隐藏错误消息
+        function hideErrorMessage() {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.classList.add('hidden');
+        }
+
+        // 加密文件
+        async function encryptFile(file, password) {
+            try {
+                // 从密码生成加密密钥
+                const encoder = new TextEncoder();
+                const passwordBuffer = encoder.encode(password);
+                const salt = crypto.getRandomValues(new Uint8Array(16));
+
+                const keyMaterial = await crypto.subtle.importKey(
+                    'raw',
+                    passwordBuffer,
+                    { name: 'PBKDF2' },
+                    false,
+                    ['deriveKey']
+                );
+
+                const key = await crypto.subtle.deriveKey(
+                    {
+                        name: 'PBKDF2',
+                        salt: salt,
+                        iterations: 100000,
+                        hash: 'SHA-256'
+                    },
+                    keyMaterial,
+                    { name: 'AES-GCM', length: 256 },
+                    false,
+                    ['encrypt']
+                );
+
+                // 生成随机IV
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+
+                // 读取文件内容
+                const fileBuffer = await readFileAsArrayBuffer(file);
+
+                // 加密文件内容
+                const encryptedBuffer = await crypto.subtle.encrypt(
+                    {
+                        name: 'AES-GCM',
+                        iv: iv,
+                        tagLength: 128
+                    },
+                    key,
+                    fileBuffer
+                );
+
+                // 创建包含盐、IV和加密数据的Blob
+                const encryptedBlob = new Blob([
+                    salt,           // 16字节盐
+                    iv,             // 12字节IV
+                    new Uint8Array(encryptedBuffer)
+                ], { type: 'application/octet-stream' });
+
+                // 生成加密后的文件名 (添加.lmdx后缀)
+                const encryptedFileName = addEncryptedExtension(file.name);
+
+                // 创建下载URL
+                const encryptedUrl = URL.createObjectURL(encryptedBlob);
+
+                return {
+                    name: encryptedFileName,
+                    size: encryptedBlob.size,
+                    url: encryptedUrl,
+                    originalFile: file,
+                    action: '加密'
+                };
+            } catch (error) {
+                console.error('加密出错:', error);
+                throw new Error('加密过程中发生错误');
+            }
+        }
+
+        // 解密文件
+        async function decryptFile(file, password) {
+            try {
+                // 从密码生成解密密钥
+                const encoder = new TextEncoder();
+                const passwordBuffer = encoder.encode(password);
+
+                // 读取文件内容
+                const fileBuffer = await readFileAsArrayBuffer(file);
+
+                // 验证文件是否是加密文件
+                if (fileBuffer.byteLength < 28) {
+                    throw new Error('文件格式不正确，不是有效的加密文件');
+                }
+
+                // 提取盐(前16字节)
+                const salt = fileBuffer.slice(0, 16);
+
+                // 提取IV(接下来的12字节)
+                const iv = fileBuffer.slice(16, 28);
+
+                // 提取加密数据(剩余部分)
+                const encryptedData = fileBuffer.slice(28);
+
+                // 生成解密密钥
+                const keyMaterial = await crypto.subtle.importKey(
+                    'raw',
+                    passwordBuffer,
+                    { name: 'PBKDF2' },
+                    false,
+                    ['deriveKey']
+                );
+
+                const key = await crypto.subtle.deriveKey(
+                    {
+                        name: 'PBKDF2',
+                        salt: salt,
+                        iterations: 100000,
+                        hash: 'SHA-256'
+                    },
+                    keyMaterial,
+                    { name: 'AES-GCM', length: 256 },
+                    false,
+                    ['decrypt']
+                );
+
+                // 解密文件内容
+                const decryptedBuffer = await crypto.subtle.decrypt(
+                    {
+                        name: 'AES-GCM',
+                        iv: iv,
+                        tagLength: 128
+                    },
+                    key,
+                    encryptedData
+                );
+
+                // 获取原始文件名 (移除.lmdx后缀)
+                const originalFileName = removeEncryptedExtension(file.name);
+
+                // 尝试从文件内容中检测MIME类型
+                const blob = new Blob([decryptedBuffer]);
+
+                // 创建下载URL
+                const decryptedUrl = URL.createObjectURL(blob);
+
+                return {
+                    name: originalFileName,
+                    size: blob.size,
+                    url: decryptedUrl,
+                    originalFile: file,
+                    action: '解密'
+                };
+            } catch (error) {
+                console.error('解密出错:', error);
+                if (error.name === 'OperationError') {
+                    throw new Error('解密失败: 密码错误或文件已损坏');
+                }
+                throw new Error('解密过程中发生错误');
+            }
+        }
+
+        // 读取文件为ArrayBuffer
+        function readFileAsArrayBuffer(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // 添加加密文件后缀
+        function addEncryptedExtension(fileName) {
+            return fileName + ENCRYPTED_EXTENSION;
+        }
+
+        // 移除加密文件后缀
+        function removeEncryptedExtension(fileName) {
+            if (fileName.endsWith(ENCRYPTED_EXTENSION)) {
+                return fileName.slice(0, -ENCRYPTED_EXTENSION.length);
+            }
+            return fileName;
+        }
+
+        // 显示处理结果
+        function displayResults(results) {
+            const resultContainer = document.getElementById('result-container');
+            const resultList = document.getElementById('result-list');
+            const emptyState = document.getElementById('empty-state');
+
+            // 如果是空状态，先隐藏它
+            if (!emptyState.classList.contains('hidden')) {
+                emptyState.classList.add('hidden');
+                resultList.classList.remove('hidden');
+            }
+
+            // 添加每个文件的结果
+            results.forEach(result => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-smooth group';
+
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'flex items-center';
+
+                const fileIcon = document.createElement('div');
+                fileIcon.className = 'w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mr-3 group-hover:bg-primary/20 transition-smooth';
+
+                const icon = document.createElement('i');
+                icon.className = 'fa fa-file-o text-primary';
+                fileIcon.appendChild(icon);
+
+                const fileName = document.createElement('div');
+                fileName.className = 'flex flex-col';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'font-medium text-gray-900 truncate max-w-xs';
+                nameSpan.textContent = result.name;
+
+                const sizeSpan = document.createElement('span');
+                sizeSpan.className = 'text-xs text-gray-500';
+                sizeSpan.textContent = formatFileSize(result.size);
+
+                const actionSpan = document.createElement('span');
+                actionSpan.className = 'text-xs text-gray-500';
+                actionSpan.textContent = result.action;
+
+                fileName.appendChild(nameSpan);
+                fileName.appendChild(sizeSpan);
+                fileName.appendChild(actionSpan);
+
+                fileInfo.appendChild(fileIcon);
+                fileInfo.appendChild(fileName);
+
+                const fileActions = document.createElement('div');
+                fileActions.className = 'flex items-center space-x-2';
+
+                const downloadBtn = document.createElement('a');
+                downloadBtn.href = result.url;
+                downloadBtn.className = 'p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-smooth';
+                downloadBtn.innerHTML = '<i class="fa fa-download"></i>';
+                downloadBtn.setAttribute('download', result.name);
+
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'p-2 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-smooth';
+                infoBtn.innerHTML = '<i class="fa fa-info-circle"></i>';
+                infoBtn.addEventListener('click', () => showFileInfo(result));
+
+                fileActions.appendChild(downloadBtn);
+                fileActions.appendChild(infoBtn);
+
+                fileItem.appendChild(fileInfo);
+                fileItem.appendChild(fileActions);
+
+                // 添加淡入动画效果
+                fileItem.style.opacity = '0';
+                fileItem.style.transform = 'translateY(10px)';
+                fileItem.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+                resultList.appendChild(fileItem);
+
+                // 触发重排后应用动画
+                setTimeout(() => {
+                    fileItem.style.opacity = '1';
+                    fileItem.style.transform = 'translateY(0)';
+                }, 10);
+            });
+
+            // 滚动到结果区域
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 显示文件信息
+        function showFileInfo(file) {
+            alert(`文件: ${file.name}\n大小: ${formatFileSize(file.size)}\n操作: ${file.action}`);
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 添加清空结果按钮事件
+        document.getElementById('clearResults').addEventListener('click', function () {
+            const resultList = document.getElementById('result-list');
+            const emptyState = document.getElementById('empty-state');
+
+            // 清空结果列表
+            resultList.innerHTML = '';
+
+            // 显示空状态
+            resultList.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+        });
+    </script>
+</body>
+
+</html>
