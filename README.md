@@ -1,5 +1,5 @@
 # web文件在线加密
-
+在线加密地址：https://fghdz.github.io/WebFileEncryption/
 ## 项目概述
 web文件在线加密是一个基于 HTML、Tailwind CSS 和 JavaScript 构建的在线文件加密与解密工具。该工具允许用户在本地浏览器环境下对文件进行加密和解密操作，无需将文件上传至服务器，保障用户数据隐私。
 
