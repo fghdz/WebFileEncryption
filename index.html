@@ -7,6 +7,7 @@
     <title>web文件在线加密</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -110,7 +111,7 @@
                 <i class="fa fa-shield text-primary text-2xl"></i>
             </div>
             <h1 class="text-[clamp(1.8rem,5vw,2.8rem)] font-bold text-gray-900 mb-4">
-                <span class="text-gradient">web文件在线加密</span>
+                <span class="text-gradient">web文件在线加密（开源版）</span>
             </h1>
             <p class="text-gray-600 max-w-2xl mx-auto text-lg">
                 非常危险地加密/解密您的文件，您的隐私和数据安全非常不重要
@@ -233,9 +234,14 @@
                             </div>
                             <h2 class="text-xl font-bold text-gray-900">处理结果</h2>
                         </div>
-                        <button id="clearResults" class="text-sm text-gray-500 hover:text-gray-700 transition-smooth">
-                            <i class="fa fa-trash-o mr-1"></i> 清空
-                        </button>
+                        <div class="flex space-x-2">
+                            <button id="downloadAll" class="text-sm text-gray-500 hover:text-gray-700 transition-smooth">
+                                <i class="fa fa-download mr-1"></i> 打包下载
+                            </button>
+                            <button id="clearResults" class="text-sm text-gray-500 hover:text-gray-700 transition-smooth">
+                                <i class="fa fa-trash-o mr-1"></i> 清空
+                            </button>
+                        </div>
                     </div>
 
                     <div id="empty-state" class="py-10 text-center">
@@ -245,6 +251,11 @@
                         <h3 class="text-lg font-medium text-gray-700 mb-2">暂无处理的文件</h3>
                         <p class="text-sm text-gray-500 max-w-xs mx-auto">
                             上传文件并完成加密/解密后，结果将显示在这里
+                        
+                        </p>
+                         <p class="text-sm text-gray-500 max-w-xs mx-auto">
+                            注意：点击批量打包下载后，会根据文件大小进行压缩，可能需要30S以上，请勿反复点击或刷新
+                        
                         </p>
                     </div>
 
@@ -267,7 +278,7 @@
                                 <p>• 请记住您的密码，否则无法解密文件</p>
                                 <p>• 所有操作都在本地完成，不会上传到服务器</p>
                                 <p>• 建议使用复杂密码提高安全性</p>
-                                 <p class="text-danger">•加密文件大小取决于本地设备的RAM 和算力大小</p>
+                                <p class="text-danger">• 加密文件大小取决于本地设备的RAM 和算力大小</p>
                             </div>
                         </div>
                     </div>
@@ -295,35 +306,34 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">多次迭代加密</h3>
                     <p class="text-gray-600 text-sm">迭代是什么意思我也不知道，用户肯定也不知道，骗就行了，我应该把文案写成宇宙级加密的，艺术加工懂吗</p>
                 </div>
-                
+
                 <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">无限制加解密文件大小</h3>
                     <p class="text-gray-600 text-sm">文件越大，本站偷的越欢，可惜啊，本站服务器没那么大的硬盘和带宽，不然把用户的文件都偷了拿去卖钱</p>
                 </div>
-                
-                
+
+
                 <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">本地处理</h3>
                     <p class="text-gray-600 text-sm">嗯，可是这个代码在我的服务器上，上传了用户也不知道，我反手就买了用户的文件，我还把用户密码给偷了拿去撞库</p>
                 </div>
-                
+
                 <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">SHA-256+AES-GCM加密</h3>
                     <p class="text-gray-600 text-sm">SHA-256和AES-GCM是啥东西，我随便找一个名词来骗用户就行了，用户看见自己不懂的就觉得这东西非常高级</p>
                 </div>
-                
+
                 <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">专业加密格式.lmdx</h3>
                     <p class="text-gray-600 text-sm">用户不知道，其实这就代表着加密算法太垃圾，本程序甚至都没有碰到用户的文件，随便加一个后缀代表加密就行了，某些用户甚至连后缀是什么都不知道</p>
                 </div>
-                
+
                 <div class="border-l-4 border-primary bg-white rounded-lg shadow-soft p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">高速加解密</h3>
                     <p class="text-gray-600 text-sm">就如左边说的，改个后缀要什么算力，当然本站会故意创建延时，来增加一点点的加密时间，让用户感觉到真的在加密</p>
                 </div>
-                
-                
-                
+
+
             </div>
         </section>
 
@@ -365,35 +375,36 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">下载结果</h3>
                         <p class="text-gray-600 text-sm">操作完成后，点击下载按钮获取处理后的文件。</p>
                     </div>
-                    
+
                 </div>
-                
-                
-                 <div class="flex items-start">
+
+
+                <div class="flex items-start">
                     <div class="w-10 h-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">5</div>
                     <div class="ml-4">
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">解密文件</h3>
                         <p class="text-gray-600 text-sm">上传加密后的文件后点击解密</p>
                     </div>
                 </div>
-                
-                   <div class="flex items-start">
+
+                <div class="flex items-start">
                     <div class="w-10 h-10 flex-shrink-0 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">5</div>
                     <div class="ml-4">
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">下载解密文件</h3>
                         <p class="text-gray-600 text-sm">操作完成后，点击下载按钮获取处理后的文件</p>
+
                     </div>
                 </div>
-                
-                
+
+
             </div>
         </section>
 
         <!-- 页脚 -->
         <footer class="mt-16 text-center text-sm text-gray-500 pb-8">
             <p>© 2025 web文件在线加密 | 在偷你的重要数据</p>
-            <p>免责声明：本站的文案仅供娱乐，本站未偷任何用户文件，加解密也是相对安全的，本程序仅供学习，请勿加密重要机密文件</p>
-            <p>开放源代码：https://github.com/fghdz/WebFileEncryption </p>
+            <p>免责声明：本站的文案仅供娱乐，本站未偷任何用户文件，加解密也是相对安全的</p>
+            <p>开放源代码：https://github.com/fghdz/WebFileEncryption</p>
         </footer>
     </div>
 
@@ -641,7 +652,7 @@
                 };
             } catch (error) {
                 console.error('加密出错:', error);
-                throw new Error('加密过程中发生错误');
+                throw new Error('加密过程中发生错误，可能文件大小超过设备内存上限');
             }
         }
 
@@ -752,116 +763,86 @@
 
         // 显示处理结果
         function displayResults(results) {
-            const resultContainer = document.getElementById('result-container');
             const resultList = document.getElementById('result-list');
             const emptyState = document.getElementById('empty-state');
 
-            // 如果是空状态，先隐藏它
-            if (!emptyState.classList.contains('hidden')) {
-                emptyState.classList.add('hidden');
-                resultList.classList.remove('hidden');
-            }
-
-            // 添加每个文件的结果
+            resultList.innerHTML = '';
             results.forEach(result => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-smooth group';
+                const item = document.createElement('div');
+                item.classList.add('flex', 'items-center', 'justify-between', 'border-b', 'border-gray-200', 'pb-4');
 
-                const fileInfo = document.createElement('div');
-                fileInfo.className = 'flex items-center';
+                const info = document.createElement('div');
+                info.classList.add('flex', 'items-center');
 
-                const fileIcon = document.createElement('div');
-                fileIcon.className = 'w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mr-3 group-hover:bg-primary/20 transition-smooth';
+                const icon = document.createElement('div');
+                icon.classList.add('w-8', 'h-8', 'rounded-full', 'bg-primary/10', 'flex', 'items-center', 'justify-center', 'mr-3');
+                const iconElement = document.createElement('i');
+                iconElement.classList.add('fa', result.action === '加密' ? 'fa-lock' : 'fa-unlock');
+                icon.appendChild(iconElement);
+                info.appendChild(icon);
 
-                const icon = document.createElement('i');
-                icon.className = 'fa fa-file-o text-primary';
-                fileIcon.appendChild(icon);
+                const details = document.createElement('div');
+                const name = document.createElement('p');
+                name.classList.add('text-base', 'font-medium', 'text-gray-900');
+                name.textContent = result.name;
+                details.appendChild(name);
+                const size = document.createElement('p');
+                size.classList.add('text-sm', 'text-gray-500');
+                size.textContent = `${(result.size / 1024).toFixed(2)} KB`;
+                details.appendChild(size);
+                info.appendChild(details);
+                item.appendChild(info);
 
-                const fileName = document.createElement('div');
-                fileName.className = 'flex flex-col';
+                const downloadButton = document.createElement('a');
+                downloadButton.classList.add('text-sm', 'text-primary', 'hover:text-primary/90', 'transition-smooth');
+                downloadButton.href = result.url;
+                downloadButton.download = result.name;
+                downloadButton.textContent = '下载';
+                item.appendChild(downloadButton);
 
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'font-medium text-gray-900 truncate max-w-xs';
-                nameSpan.textContent = result.name;
-
-                const sizeSpan = document.createElement('span');
-                sizeSpan.className = 'text-xs text-gray-500';
-                sizeSpan.textContent = formatFileSize(result.size);
-
-                const actionSpan = document.createElement('span');
-                actionSpan.className = 'text-xs text-gray-500';
-                actionSpan.textContent = result.action;
-
-                fileName.appendChild(nameSpan);
-                fileName.appendChild(sizeSpan);
-                fileName.appendChild(actionSpan);
-
-                fileInfo.appendChild(fileIcon);
-                fileInfo.appendChild(fileName);
-
-                const fileActions = document.createElement('div');
-                fileActions.className = 'flex items-center space-x-2';
-
-                const downloadBtn = document.createElement('a');
-                downloadBtn.href = result.url;
-                downloadBtn.className = 'p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-smooth';
-                downloadBtn.innerHTML = '<i class="fa fa-download"></i>';
-                downloadBtn.setAttribute('download', result.name);
-
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'p-2 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-smooth';
-                infoBtn.innerHTML = '<i class="fa fa-info-circle"></i>';
-                infoBtn.addEventListener('click', () => showFileInfo(result));
-
-                fileActions.appendChild(downloadBtn);
-                fileActions.appendChild(infoBtn);
-
-                fileItem.appendChild(fileInfo);
-                fileItem.appendChild(fileActions);
-
-                // 添加淡入动画效果
-                fileItem.style.opacity = '0';
-                fileItem.style.transform = 'translateY(10px)';
-                fileItem.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-
-                resultList.appendChild(fileItem);
-
-                // 触发重排后应用动画
-                setTimeout(() => {
-                    fileItem.style.opacity = '1';
-                    fileItem.style.transform = 'translateY(0)';
-                }, 10);
+                resultList.appendChild(item);
             });
 
-            // 滚动到结果区域
-            resultContainer.scrollIntoView({ behavior: 'smooth' });
+            emptyState.classList.add('hidden');
+            resultList.classList.remove('hidden');
         }
 
-        // 显示文件信息
-        function showFileInfo(file) {
-            alert(`文件: ${file.name}\n大小: ${formatFileSize(file.size)}\n操作: ${file.action}`);
-        }
-
-        // 格式化文件大小
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // 添加清空结果按钮事件
+        // 清空结果
         document.getElementById('clearResults').addEventListener('click', function () {
             const resultList = document.getElementById('result-list');
             const emptyState = document.getElementById('empty-state');
 
-            // 清空结果列表
             resultList.innerHTML = '';
-
-            // 显示空状态
             resultList.classList.add('hidden');
             emptyState.classList.remove('hidden');
+        });
+
+        // 打包下载
+        document.getElementById('downloadAll').addEventListener('click', async function () {
+            showErrorMessage('正在打包中，请勿重复点击');
+            const resultList = document.getElementById('result-list');
+            const items = resultList.querySelectorAll('a');
+
+            if (items.length === 0) {
+                return;
+            }
+
+            const zip = new JSZip();
+
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                const response = await fetch(item.href);
+                const blob = await response.blob();
+                zip.file(item.download, blob);
+            }
+
+            const content = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '打包文件.zip';
+            a.click();
+            URL.revokeObjectURL(url);
         });
     </script>
 </body>
